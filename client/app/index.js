@@ -39,8 +39,6 @@ export default function LoginScreen() {
         <Button title="אין חשבון? להרשמה" onPress={() => router.push('/register')} />
         <Button title="שכחת סיסמה?" onPress={() => router.push('../forgot-password/forgot-password')} />
       </View>
-
-      {/* כאן כל התוכן שלך, כולל ScrollView/TextInput וכו' */}
     </KeyboardAvoidingView>
 
 

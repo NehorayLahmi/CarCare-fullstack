@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { jwtDecode } from "jwt-decode";
+import api from '../../lib/api';
 
 
 export default function VehiclesScreen() {
@@ -48,7 +49,6 @@ export default function VehiclesScreen() {
 
 
   const router = useRouter();
-  const url = process.env.EXPO_PUBLIC_API_URL
 
   useFocusEffect(
     useCallback(() => {
@@ -61,19 +61,9 @@ export default function VehiclesScreen() {
   useEffect(() => {
     const checkRequests = async () => {
       setLoading(true);
-      const token = await AsyncStorage.getItem('token');
       const myId = await AsyncStorage.getItem('myId');
-      //console.log('myId:', myId);
-
       try {
-        //console.log('מבצע קריאה לשרת...');
-
-
-        const response = await fetch(`http://${url}:4000/transfer?toId=${myId}&status=pending`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        //const data = await response.json();
-        //console.log('קיבלתי מהשרת:', data);
+        const { data } = await api.get('/transfer', { params: { toId: myId, status: 'pending' } });
         setHasRequests(data.length > 0);
       } catch (e) {
         setHasRequests(false);
@@ -85,23 +75,14 @@ export default function VehiclesScreen() {
   }, []);
 
 
-  const getToken = async () => {
-    return await AsyncStorage.getItem('token');
-  };
-
   const fetchVehicles = async () => {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
-      const response = await fetch(`http://${url}:4000/vehicles`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error(await response.text());
-      const data = await response.json();
+      const { data } = await api.get('/vehicles');
       setVehicles(data);
     } catch (e) {
-      setError(e.message);
+      setError(e.response?.data?.message || e.message);
     } finally {
       setLoading(false);
     }
@@ -116,15 +97,10 @@ export default function VehiclesScreen() {
         onPress: async () => {
           setLoading(true);
           try {
-            const token = await getToken();
-            const response = await fetch(`http://${url}:4000/vehicles/${vehicleId}`, {
-              method: 'DELETE',
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            if (!response.ok) throw new Error(await response.text());
+            await api.delete(`/vehicles/${vehicleId}`);
             await fetchVehicles();
           } catch (e) {
-            Alert.alert('שגיאה', e.message);
+            Alert.alert('שגיאה', e.response?.data?.message || e.message);
           } finally {
             setLoading(false);
           }
@@ -171,20 +147,7 @@ export default function VehiclesScreen() {
     }
     setLoading(true);
     try {
-      const token = await getToken();
-      const response = await fetch(`http://${url}:4000/vehicles`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ licensePlate: plate, model, year, kilometer }),
-      });
-
-      if (!response.ok) {
-        //Alert.alert('שגיאה', 'לא ניתן להוסיף את הרכב. ייתכן ומספר הרישוי כבר קיים.');
-        throw new Error(await response.text());
-      }
+      await api.post('/vehicles', { licensePlate: plate, model, year, kilometer });
       setPlate('');
       setModel('');
       setYear('');
@@ -192,7 +155,7 @@ export default function VehiclesScreen() {
       setModalVisible(false);
       fetchVehicles();
     } catch (e) {
-      Alert.alert('שגיאה', e.message);
+      Alert.alert('שגיאה', e.response?.data?.message || e.message);
       setLoading(false);
     }
   };
@@ -221,13 +184,9 @@ export default function VehiclesScreen() {
 
   const fetchPendingRequests = async () => {
     setLoadingRequests(true);
-    const token = await AsyncStorage.getItem('token');
-    const myId = await AsyncStorage.getItem('myId'); // תעודת זהות של המשתמש הנוכחי
+    const myId = await AsyncStorage.getItem('myId');
     try {
-      const response = await fetch(`http://${url}:4000/transfer?toId=${myId}&status=pending`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
+      const { data } = await api.get('/transfer', { params: { toId: myId, status: 'pending' } });
       setPendingRequests(data);
     } catch (e) {
       setPendingRequests([]);

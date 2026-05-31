@@ -2,22 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import api from '../../../lib/api';
 
 export default function IncomingTransfersScreen() {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
-    const url = process.env.EXPO_PUBLIC_API_URL;
 
     const router = useRouter();
     const fetchRequests = async () => {
         setLoading(true);
-        const token = await AsyncStorage.getItem('token');
-        const myId = await AsyncStorage.getItem('myId'); // תעודת זהות שלי
+        const myId = await AsyncStorage.getItem('myId');
         try {
-            const response = await fetch(`http://${url}:4000/transfer?toId=${myId}&status=pending`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = await response.json();
+            const { data } = await api.get('/transfer', { params: { toId: myId, status: 'pending' } });
             setRequests(data);
         } catch (e) {
             Alert.alert('שגיאה', 'בעיה בשליפת בקשות');
@@ -27,31 +23,17 @@ export default function IncomingTransfersScreen() {
     };
 
     const respondToRequest = async (requestId, decision) => {
-        const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://${url}:4000/transfer/${requestId}/respond`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ decision }),
-            });
-            const resJson = await response.json();
-            if (!response.ok) throw new Error(resJson.message);
+            await api.post(`/transfer/${requestId}/respond`, { decision });
             Alert.alert('הצלחה', decision === 'approved' ? 'הרכב עבר לבעלותך!' : 'הבקשה נדחתה', [
                 {
                     text: 'סגור',
-                    onPress: () => {
-                        // סגור את מסך הבקשות (חזור אחורה)
-                        router.back(); // expo-router
-                        // navigation.goBack(); // react-navigation
-                    },
+                    onPress: () => { router.back(); },
                 },
             ]);
             fetchRequests();
         } catch (e) {
-            Alert.alert('שגיאה', e.message);
+            Alert.alert('שגיאה', e.response?.data?.message || e.message);
         }
     };
 

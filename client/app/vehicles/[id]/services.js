@@ -7,10 +7,9 @@ import { Picker } from '@react-native-picker/picker';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Slider from '@react-native-community/slider';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker'; // ייבוא חדש זה
 import { KeyboardAvoidingView, Platform } from 'react-native';
-const url = process.env.EXPO_PUBLIC_API_URL; // כתובת השרת שלך
+import api from '../../../lib/api';
 // רשימות קבועות
 const SERVICE_TYPES = [
   'החלפת שמן',
@@ -102,11 +101,7 @@ export default function VehicleServicesScreen() {
   const fetchServices = async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`http://${url}:4000/services/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
+      const { data } = await api.get(`/services/${id}`);
       setServices(data);
 
       // 🟡 חישוב הקילומטראז' האחרון (הגבוה ביותר)
@@ -128,11 +123,7 @@ export default function VehicleServicesScreen() {
 
   const fetchVehicle = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await get(`http://${url}:4000/vehicles/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
+      const { data } = await api.get(`/vehicles/${id}`);
       setVehicle(data);
     } catch (e) {
       setVehicle(null);
@@ -202,22 +193,7 @@ export default function VehicleServicesScreen() {
 
   async function fetchServicesByModel(tozeret, degem) {
     try {
-      const token = await AsyncStorage.getItem('token');
-      const urlToFetch = `http://${url}:4000/modelService/${encodeURIComponent(tozeret)}/${encodeURIComponent(degem)}`;
-      console.log('[fetchServicesByModel] שולח בקשה לכתובת:', urlToFetch, '| טוקן:', token);
-
-      const response = await fetch(
-        urlToFetch,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-
-      console.log('[fetchServicesByModel] סטטוס תגובה:', response.status);
-
-      if (!response.ok) throw new Error('שגיאה בקבלת טיפולים מהשרת');
-
-      const services1 = await response.json();
+      const { data: services1 } = await api.get(`/modelService/${encodeURIComponent(tozeret)}/${encodeURIComponent(degem)}`);
       console.log('[fetchServicesByModel] התקבלו טיפולים:', services1, '| פרמטרים:', tozeret, degem);
 
       if (services1.length > 0) {
@@ -308,9 +284,6 @@ export default function VehicleServicesScreen() {
     }
 
     try {
-      const token = await AsyncStorage.getItem('token');
-
-      // בניית ה-body של הבקשה
       const requestBody = {
         type: finalType,
         date,
@@ -321,70 +294,29 @@ export default function VehicleServicesScreen() {
       };
 
       if (editMode && _id) {
-        // מצב עריכה (PUT)
-        const response = await fetch(`http://${url}:4000/services/${_id}`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
-        });
-
-        if (!response.ok) { // טיפול בשגיאות HTTP (למשל, 404, 500)
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'שגיאת שרת בעת עדכון טיפול');
-        }
-
+        await api.put(`/services/${_id}`, requestBody);
         Alert.alert('הצלחה', `הטיפול עודכן בהצלחה!`);
       } else {
-        // מצב יצירה (POST)
-        const response = await fetch(`http://${url}:4000/services`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ...requestBody, vehicleId: id }), // הוספת vehicleId ליצירה
-        });
-
-        if (!response.ok) { // טיפול בשגיאות HTTP
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'שגיאת שרת בעת יצירת טיפול חדש');
-        }
-
+        await api.post(`/services`, { ...requestBody, vehicleId: id });
         Alert.alert('הצלחה', `הטיפול נשמר בהצלחה!`);
       }
 
-      setModalVisible(false); // סגור את המודאל
-      resetForm();           // אפס את הטופס
-      await fetchServices(); // **חשוב: המתן לטעינה מחדש של הטיפולים וחישוב הטיפול התקופתי**
+      setModalVisible(false);
+      resetForm();
+      await fetchServices();
 
     } catch (e) {
-      //console.error('שגיאה בשמירת טיפול:', e); // לוג שגיאות מפורט
-      Alert.alert('שגיאה', `לא ניתן לשמור טיפול: ${e.message || 'נסה שוב מאוחר יותר'}`);
+      Alert.alert('שגיאה', `לא ניתן לשמור טיפול: ${e.response?.data?.message || e.message || 'נסה שוב מאוחר יותר'}`);
     }
   };
 
   const deleteService = async (serviceId) => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`http://${url}:4000/services/${serviceId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!response.ok) { // טיפול בשגיאות HTTP
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'שגיאת שרת בעת מחיקת טיפול');
-      }
-
-      await fetchServices(); // **חשוב: המתן לטעינה מחדש של הטיפולים וחישוב הטיפול התקופתי**
+      await api.delete(`/services/${serviceId}`);
+      await fetchServices();
       Alert.alert('הצלחה', 'הטיפול נמחק בהצלחה!');
-
     } catch (e) {
-      //console.error('שגיאה במחיקת טיפול:', e); // לוג שגיאות מפורט
-      Alert.alert('שגיאה', `לא ניתן למחוק טיפול: ${e.message || 'נסה שוב מאוחר יותר'}`);
+      Alert.alert('שגיאה', `לא ניתן למחוק טיפול: ${e.response?.data?.message || e.message || 'נסה שוב מאוחר יותר'}`);
     }
   };
 
@@ -542,7 +474,6 @@ export default function VehicleServicesScreen() {
                     marginLeft: 5,
                     transform: [{ rotateY: '180deg' }] // היפוך החץ ימינה
                   }}
-                // אם תרצה לשלוט בעיצוב פריטי הרשימה:
                 // listItemLabelStyle={{ textAlign: 'right' }}
                 // selectedItemLabelStyle={{ fontWeight: 'bold' }}
                 // containerStyle={{ height: 40 }} // הגדרת גובה קבוע

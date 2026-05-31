@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-
-const url = process.env.EXPO_PUBLIC_API_URL || 'localhost';
+import api from '../../lib/api';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
@@ -12,17 +11,11 @@ export default function ForgotPasswordScreen() {
   const handleSendCode = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://${url}:4000/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      await api.post('/auth/forgot-password', { email });
       Alert.alert('הצלחה', 'קוד אימות נשלח למייל');
       router.push({ pathname: '/forgot-password/verify-code', params: { email } });
     } catch (e) {
-      Alert.alert('שגיאה', e.message);
+      Alert.alert('שגיאה', e.response?.data?.message || e.message);
     } finally {
       setLoading(false);
     }

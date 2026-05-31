@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-
-const url = process.env.EXPO_PUBLIC_API_URL || 'localhost';
+import api from '../../lib/api';
 
 export default function VerifyCodeScreen() {
   const router = useRouter();
@@ -13,17 +12,11 @@ export default function VerifyCodeScreen() {
   const handleVerify = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://${url}:4000/auth/verify-reset-code`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      await api.post('/auth/verify-reset-code', { email, code });
       Alert.alert('הצלחה', 'קוד אומת, המשך לאיפוס סיסמה');
       router.push({ pathname: '/forgot-password/reset-password', params: { email, code } });
     } catch (e) {
-      Alert.alert('שגיאה', e.message);
+      Alert.alert('שגיאה', e.response?.data?.message || e.message);
     } finally {
       setLoading(false);
     }

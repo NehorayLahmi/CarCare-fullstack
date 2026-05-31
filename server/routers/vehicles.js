@@ -93,26 +93,6 @@ router.put('/:licensePlate/kilometer', async (req, res) => {
 });
 
 
-// עדכון קילומטרז' לפי licensePlate (או לפי _id אם תרצה)
-router.put('/:licensePlate/kilometer', async (req, res) => {
-  try {
-    const { kilometer } = req.body;
-    if (typeof kilometer !== 'number') {
-      return res.status(400).send('ערך קילומטרז\' לא תקין');
-    }
-    const vehicle = await Vehicle.findOneAndUpdate(
-      { licensePlate: req.params.licensePlate, userId: req.user.id },
-      { kilometer },
-      { new: true }
-    );
-    if (!vehicle) return res.status(404).send('רכב לא נמצא');
-    res.send(vehicle);
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
-
-
 
 // מחיקת רכב
 router.delete('/:id', async (req, res) => {

@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
     if (!isMatch) return res.status(401).send("סיסמה לא נכונה");
 
     const token = jwt.sign(
-      { id: user.id, role: user.role },  // <-- הוסף כאן את ה-role
+      { id: user.id, role: user.role }, 
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );

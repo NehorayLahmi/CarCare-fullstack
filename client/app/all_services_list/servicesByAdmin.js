@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, ScrollView, KeyboardAvoidingView, Platform
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import api from '../../lib/api';
 
 export default function AddModelService() {
   const router = useRouter();
-  const url = process.env.EXPO_PUBLIC_API_URL;
 
   const [tozeretNm, setTozeretNm] = useState('');
   const [degemNm, setDegemNm] = useState('');
@@ -26,34 +25,21 @@ export default function AddModelService() {
     }
 
     try {
-      const token = await AsyncStorage.getItem('token');
-      const res = await fetch(`http://${url}:4000/modelService`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tozeret_nm: tozeretNm.trim(),
-          degem_nm: degemNm.trim(),
-          serviceType: serviceType.trim(),
-          serviceIntervalKm: serviceIntervalKm ? Number(serviceIntervalKm) : undefined,
-          serviceIntervalMonths: serviceIntervalMonths ? Number(serviceIntervalMonths) : undefined,
-          notes: notes.trim(),
-          averageCost: averageCost ? Number(averageCost) : undefined,
-          garageName: garageName.trim(),
-        }),
+      await api.post('/modelService', {
+        tozeret_nm: tozeretNm.trim(),
+        degem_nm: degemNm.trim(),
+        serviceType: serviceType.trim(),
+        serviceIntervalKm: serviceIntervalKm ? Number(serviceIntervalKm) : undefined,
+        serviceIntervalMonths: serviceIntervalMonths ? Number(serviceIntervalMonths) : undefined,
+        notes: notes.trim(),
+        averageCost: averageCost ? Number(averageCost) : undefined,
+        garageName: garageName.trim(),
       });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'שגיאה בשמירה');
-      }
 
       Alert.alert('הצלחה', 'סוג טיפול נוסף בהצלחה');
       router.back();
     } catch (e) {
-      Alert.alert('שגיאה', e.message);
+      Alert.alert('שגיאה', e.response?.data?.message || e.message);
     }
   };
 

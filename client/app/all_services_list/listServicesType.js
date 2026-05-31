@@ -7,34 +7,21 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SwipeListView } from 'react-native-swipe-list-view';
+import api from '../../lib/api';
 
 export default function ManufacturerTreatments({ manufacturer, onBack }) {
   const [treatments, setTreatments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedIndex, setExpandedIndex] = useState(null);
-  const url = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
     async function fetchTreatments() {
       try {
-        const token = await AsyncStorage.getItem('token');
-        const response = await fetch(
-          `http://${url}:4000/modelService?tozeret_nm=${encodeURIComponent(
-            manufacturer,
-          )}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-
-        if (!response.ok) throw new Error('שגיאה בטעינת טיפולים');
-
-        const data = await response.json();
+        const { data } = await api.get('/modelService', { params: { tozeret_nm: manufacturer } });
         setTreatments(data);
       } catch (error) {
-        Alert.alert('שגיאה', error.message || 'אירעה שגיאה');
+        Alert.alert('שגיאה', error.response?.data?.message || error.message || 'אירעה שגיאה');
       } finally {
         setLoading(false);
       }
@@ -45,18 +32,9 @@ export default function ManufacturerTreatments({ manufacturer, onBack }) {
 
   async function deleteTreatment(item) {
     try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(
-        `http://${url}:4000/modelService/${encodeURIComponent(
-          item.tozeret_nm,
-        )}/${encodeURIComponent(item.degem_nm)}`,
-        {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` },
-        },
+      const { data: json } = await api.delete(
+        `/modelService/${encodeURIComponent(item.tozeret_nm)}/${encodeURIComponent(item.degem_nm)}`
       );
-      if (!response.ok) throw new Error('שגיאה במחיקת טיפול');
-      const json = await response.json();
       Alert.alert('הצלחה', json.message);
       setTreatments(prev =>
         prev.filter(
@@ -70,7 +48,7 @@ export default function ManufacturerTreatments({ manufacturer, onBack }) {
       );
       setExpandedIndex(null);
     } catch (error) {
-      Alert.alert('שגיאה', error.message);
+      Alert.alert('שגיאה', error.response?.data?.message || error.message);
     }
   }
 

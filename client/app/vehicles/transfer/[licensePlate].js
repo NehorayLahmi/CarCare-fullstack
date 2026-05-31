@@ -3,14 +3,13 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../../../lib/api';
 
 export default function TransferOwnershipScreen() {
   const { licensePlate } = useLocalSearchParams();
   const [targetId, setTargetId] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const url = process.env.EXPO_PUBLIC_API_URL;
 
   // בדיקה בסיסית לתעודת זהות
   const isValidId = (id) => /^\d{5,10}$/.test(id);
@@ -27,27 +26,12 @@ export default function TransferOwnershipScreen() {
 
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`http://${url}:4000/transfer`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          licensePlate,
-          toId: targetId.trim()
-        }),
-      });
-
-      const resJson = await response.json();
-      if (!response.ok) throw new Error(resJson.message || 'שגיאה בשליחת הבקשה');
-
+      await api.post('/transfer', { licensePlate, toId: targetId.trim() });
       Alert.alert('הצלחה', 'בקשת ההעברה נשלחה בהצלחה');
       setTargetId('');
       router.back();
     } catch (e) {
-      Alert.alert('שגיאה', e.message);
+      Alert.alert('שגיאה', e.response?.data?.message || e.message);
     } finally {
       setLoading(false);
     }
