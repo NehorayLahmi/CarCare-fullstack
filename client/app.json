@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "navigateTemplate",
-    "slug": "navigateTemplate",
+    "name": "CarCare",
+    "slug": "CarCare",
     "scheme": "vehicleapp",
     "version": "1.0.0",
     "orientation": "portrait",
