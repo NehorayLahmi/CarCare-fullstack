@@ -60,13 +60,11 @@ export default function ManufacturerTreatments({ manufacturer, onBack }) {
         onPress={() => setExpandedIndex(isExpanded ? null : index)}
         activeOpacity={0.8}
       >
-        {/* דגם ויצרן מוצגים למעלה */}
         <View style={styles.headerExpanded}>
           <Text style={styles.treatmentTitle}>דגם: {item.degem_nm}</Text>
           <Text style={styles.treatmentTitle}>יצרן: {item.tozeret_nm}</Text>
         </View>
 
-        {/* פרטי הטיפול מימין לשמאל */}
         {isExpanded && (
           <View style={styles.details}>
             <Text style={styles.detailText}>סוג טיפול: {item.serviceType}</Text>
