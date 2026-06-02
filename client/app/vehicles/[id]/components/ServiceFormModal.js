@@ -3,7 +3,6 @@ import {
   View, Text, TextInput, TouchableOpacity, Modal, FlatList,
   ActivityIndicator, Alert, StyleSheet, Platform, KeyboardAvoidingView, ScrollView,
 } from 'react-native';
-import Slider from '@react-native-community/slider';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import api from '../../../../lib/api';
 import { SERVICE_TYPES } from './constants';
@@ -31,6 +30,7 @@ export default function ServiceFormModal({
   const [datePickerValue, setDatePickerValue] = useState(new Date());
   const [garageResults, setGarageResults] = useState([]);
   const [garageLoading, setGarageLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (visible && initialValues) {
@@ -87,6 +87,7 @@ export default function ServiceFormModal({
       return;
     }
 
+    setSaving(true);
     try {
       const body = { type: finalType, date, cost: Number(cost), note, garageName, kilometer: Number(kilometer) };
       if (editMode && _id) {
@@ -100,6 +101,8 @@ export default function ServiceFormModal({
       onSaved();
     } catch (e) {
       Alert.alert('שגיאה', `לא ניתן לשמור טיפול: ${e.response?.data?.message || e.message || 'נסה שוב מאוחר יותר'}`);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -113,7 +116,7 @@ export default function ServiceFormModal({
             <Text style={styles.label}>סוג טיפול</Text>
             <TouchableOpacity style={styles.pickerBtn} onPress={() => setShowTypePicker(true)}>
               <Text style={styles.pickerArrow}>‹</Text>
-              <Text style={styles.pickerValue}>{form.type || 'בחר סוג טיפול'}</Text>
+              <Text style={styles.pickerValue} numberOfLines={1}>{form.type || 'בחר סוג טיפול'}</Text>
             </TouchableOpacity>
 
             <Modal visible={showTypePicker} transparent animationType="slide" onRequestClose={() => setShowTypePicker(false)}>
@@ -140,48 +143,57 @@ export default function ServiceFormModal({
             </Modal>
 
             {form.type === 'טיפול אחר' && (
-              <TextInput
-                style={styles.input}
-                placeholder="הזן סוג טיפול"
-                value={form.customType}
-                onChangeText={customType => setForm(f => ({ ...f, customType }))}
-              />
+              <View style={styles.customTypeContainer}>
+                <Text style={styles.customTypeLabel}>✏️ הזן שם הטיפול</Text>
+                <TextInput
+                  style={styles.customTypeInput}
+                  placeholder="לדוגמה: החלפת מצבר"
+                  placeholderTextColor="#aaa"
+                  value={form.customType}
+                  onChangeText={customType => setForm(f => ({ ...f, customType }))}
+                  autoFocus
+                  textAlign="right"
+                />
+              </View>
             )}
 
             <Text style={styles.label}>תאריך</Text>
-            <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
-              <Text style={styles.dateBtnText}>
-                {form.date || new Date().toISOString().split('T')[0]}
-              </Text>
-            </TouchableOpacity>
-            {showDatePicker && (
-              <DateTimePicker
-                value={datePickerValue}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'compact' : 'default'}
-                onChange={(event, selectedDate) => {
-                  if (event.type === 'set' && selectedDate) {
-                    setDatePickerValue(selectedDate);
-                    setForm(f => ({ ...f, date: selectedDate.toISOString().split('T')[0] }));
-                  }
-                  setShowDatePicker(false);
+            {Platform.OS === 'web' ? (
+              <input
+                type="date"
+                value={form.date || ''}
+                onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                style={{
+                  border: '1px solid #bbb', borderRadius: 7, padding: 10,
+                  fontSize: 15, marginBottom: 10, 
+                  textAlign: 'right', backgroundColor: '#f9f9f9', direction: 'rtl',
                 }}
               />
+            ) : (
+              <>
+                <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
+                  <Text style={styles.dateBtnText}>
+                    {form.date || new Date().toISOString().split('T')[0]}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={datePickerValue}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'compact' : 'default'}
+                    onChange={(event, selectedDate) => {
+                      if (event.type === 'set' && selectedDate) {
+                        setDatePickerValue(selectedDate);
+                        setForm(f => ({ ...f, date: selectedDate.toISOString().split('T')[0] }));
+                      }
+                      setShowDatePicker(false);
+                    }}
+                  />
+                )}
+              </>
             )}
 
             <Text style={styles.label}>עלות</Text>
-            <Text style={styles.sliderValue}>{form.cost} ₪</Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={0}
-              maximumValue={100000}
-              step={100}
-              value={form.cost}
-              onValueChange={value => setForm(f => ({ ...f, cost: value }))}
-              minimumTrackTintColor="#3949ab"
-              maximumTrackTintColor="#a0a0a0"
-              thumbTintColor="#3949ab"
-            />
             <TextInput
               style={styles.input}
               value={form.cost.toString()}
@@ -194,6 +206,7 @@ export default function ServiceFormModal({
               keyboardType="numeric"
               placeholder="הכנס עלות בש״ח"
             />
+
 
             <Text style={styles.label}>מוסך בו טופל הרכב</Text>
             <TextInput
@@ -238,10 +251,17 @@ export default function ServiceFormModal({
             />
 
             <View style={styles.actions}>
-              <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-                <Text style={styles.saveBtnText}>שמור</Text>
+              <TouchableOpacity
+                style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+                onPress={handleSave}
+                disabled={saving}
+              >
+                {saving
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Text style={styles.saveBtnText}>שמור</Text>
+                }
               </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={onClose} disabled={saving}>
                 <Text style={styles.cancelBtnText}>ביטול</Text>
               </TouchableOpacity>
             </View>
@@ -260,13 +280,12 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1, borderColor: '#bbb', borderRadius: 7, padding: 8, fontSize: 15, marginBottom: 10, textAlign: 'right', backgroundColor: '#f9f9f9' },
   dateBtn: { borderWidth: 1, borderColor: '#ccc', borderRadius: 7, padding: 10, marginBottom: 10, alignItems: 'flex-end', minHeight: 48 },
   dateBtnText: { fontSize: 16, fontWeight: 'bold', color: '#3949ab', textAlign: 'right' },
-  sliderValue: { fontSize: 14, color: '#333', textAlign: 'right', marginBottom: 4 },
-  slider: { width: '100%', marginBottom: 6 },
   garageList: { maxHeight: 120, backgroundColor: '#fff', borderColor: '#bbb', borderWidth: 1, borderRadius: 7, marginBottom: 10 },
   garageItem: { padding: 10, borderBottomWidth: 0.5, borderColor: '#eee' },
   garageItemText: { fontSize: 15, color: '#222' },
   actions: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginTop: 10 },
-  saveBtn: { backgroundColor: '#3949ab', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 20 },
+  saveBtn: { backgroundColor: '#3949ab', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 20, minWidth: 80, alignItems: 'center' },
+  saveBtnDisabled: { backgroundColor: '#9fa8da' },
   saveBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   cancelBtn: { backgroundColor: '#bbb', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 20 },
   cancelBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
@@ -281,8 +300,33 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: '#f9f9f9',
   },
-  pickerValue: { fontSize: 15, color: '#222', textAlign: 'right' },
-  pickerArrow: { fontSize: 20, color: '#aaa', marginLeft: 4 },
+  pickerValue: { fontSize: 15, color: '#222', textAlign: 'right', flex: 1 },
+  pickerArrow: { fontSize: 20, color: '#aaa', marginLeft: 4, flexShrink: 0 },
+  customTypeContainer: {
+    backgroundColor: '#fff8e1',
+    borderWidth: 1.5,
+    borderColor: '#f9a825',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+  },
+  customTypeLabel: {
+    fontSize: 13,
+    color: '#f57f17',
+    fontWeight: 'bold',
+    textAlign: 'right',
+    marginBottom: 6,
+  },
+  customTypeInput: {
+    borderWidth: 1,
+    borderColor: '#f9a825',
+    borderRadius: 6,
+    padding: 10,
+    fontSize: 15,
+    backgroundColor: '#fff',
+    color: '#222',
+    textAlign: 'right',
+  },
   pickerOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   pickerSheet: {
     backgroundColor: '#fff',

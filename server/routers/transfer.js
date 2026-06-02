@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Transfer = require('../models/transfer');
 const User = require('../models/User');
-const Vehicle = require('../models/Vehicle'); // ודא שהנתיב נכון
+const Vehicle = require('../models/Vehicle');
+const auth = require('../middleware/auth');
+
+router.use(auth);
 
 // יצירת בקשת העברה - עם בדיקת קיום משתמש
 router.post('/', async (req, res) => {
