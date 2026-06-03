@@ -35,10 +35,13 @@ app.use('/modelService', modelService);
 app.use((req, res) => {
   res.status(404).send('לא נמצא');
 });
-app.use((req, res, next) => {
-  console.log(`Incoming request: ${req.method} ${req.url} from ${req.ip}`);
-  next();
-});
+
+
+// app.use((req, res, next) => {
+//   console.log(`Incoming request: ${req.method} ${req.url} from ${req.ip}`);
+//   next();
+// });
+
 
 
 // app.listen(PORT, () => {
@@ -48,3 +51,5 @@ app.use((req, res, next) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server is running at ${URL}:${PORT}`);
 });
+
+module.exports = app;

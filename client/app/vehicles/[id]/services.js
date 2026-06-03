@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import api from '../../../lib/api';
-import { SERVICE_TYPES, PERIODIC_SERVICE_TYPES, INITIAL_FORM } from './components/constants';
+import { scheduleServiceReminder } from '../../../lib/notifications';
+import { SERVICE_TYPES, PERIODIC_SERVICE_TYPES, INITIAL_FORM } from '../../../lib/serviceConstants';
 import PeriodicInfoBox from './components/PeriodicInfoBox';
 import ServiceCard from './components/ServiceCard';
 import ServiceFormModal from './components/ServiceFormModal';
@@ -43,7 +44,9 @@ export default function VehicleServicesScreen() {
     setLastPeriodicService(periodic[0]);
     const next = new Date(periodic[0].date);
     next.setMonth(next.getMonth() + 6);
-    setNextPeriodicServiceDate(next.toISOString().split('T')[0]);
+    const nextDateStr = next.toISOString().split('T')[0];
+    setNextPeriodicServiceDate(nextDateStr);
+    scheduleServiceReminder(id, nextDateStr);
   };
 
   const fetchServices = async () => {

@@ -22,7 +22,7 @@ export default function RegisterScreen() {
       Alert.alert('נרשמת בהצלחה', 'ניתן להתחבר עכשיו');
       router.replace('/');
     } catch (err) {
-      Alert.alert('4שגיאה', err?.response?.data || 'אירעה שגיאה');
+      Alert.alert('שגיאה', err?.response?.data || 'אירעה שגיאה');
     }
   };
 

@@ -7,20 +7,30 @@ const auth = require('../middleware/auth');
 
 router.use(auth);
 
-// יצירת בקשת העברה - עם בדיקת קיום משתמש
+// יצירת בקשת העברה
 router.post('/', async (req, res) => {
   const { licensePlate, toId } = req.body;
   if (!licensePlate || !toId) {
     return res.status(400).json({ message: 'חסרים נתונים' });
   }
   try {
-    // בדוק אם המשתמש המקבל קיים
+    // בדיקה שהרכב שייך למשתמש המבקש
+    const vehicle = await Vehicle.findOne({ licensePlate, userId: req.user.id });
+    if (!vehicle) {
+      return res.status(403).json({ message: 'הרכב לא שייך לך' });
+    }
+
+    // בדיקה שהמשתמש המקבל קיים
     const toUser = await User.findOne({ id: toId });
     if (!toUser) {
       return res.status(404).json({ message: 'המשתמש לא קיים במערכת' });
     }
 
-    // אפשר להוסיף בדיקה דומה גם לשולח אם צריך
+    // בדיקה שאין כבר העברה פעילה (pending) לרכב זה
+    const existing = await Transfer.findOne({ licensePlate, status: 'pending' });
+    if (existing) {
+      return res.status(409).json({ message: 'קיימת כבר בקשת העברה פעילה לרכב זה' });
+    }
 
     const transfer = new Transfer({ licensePlate, toId, status: 'pending' });
     await transfer.save();

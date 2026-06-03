@@ -2,38 +2,45 @@
 
 
 
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, Alert, Platform, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // מחיקת הטוקן
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
 
 export default function HomeScreen() {
-
   const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const logout = async () => {
+    setLoggingOut(true);
     try {
-      await AsyncStorage.removeItem('token'); // מחיקת הטוקן
-      router.replace('.'); // ניווט לתיקיה הנוכחית (index.js)
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('myId');
+      router.replace('/');
     } catch (e) {
-      Alert.alert('שגיאה', 'אירעה שגיאה בעת ההתנתקות');
+      setLoggingOut(false);
+      if (Platform.OS === 'web') {
+        alert('אירעה שגיאה בעת ההתנתקות');
+      } else {
+        Alert.alert('שגיאה', 'אירעה שגיאה בעת ההתנתקות');
+      }
     }
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'התנתקות',
-      'האם אתה בטוח שברצונך להתנתק?',
-      [
+    if (Platform.OS === 'web') {
+      if (window.confirm('האם אתה בטוח שברצונך להתנתק?')) logout();
+    } else {
+      Alert.alert('התנתקות', 'האם אתה בטוח שברצונך להתנתק?', [
         { text: 'ביטול', style: 'cancel' },
-        { text: 'התנתק', onPress: logout }
-      ]
-    );
+        { text: 'התנתק', onPress: logout },
+      ]);
+    }
   };
 
   return (
@@ -49,8 +56,11 @@ export default function HomeScreen() {
       />
       <View style={styles.overlay} />
       {/* כפתור התנתקות קטן בפינה */}
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7}>
-        <MaterialIcons name="logout" size={28} color="#fff" />
+      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7} disabled={loggingOut}>
+        {loggingOut
+          ? <ActivityIndicator size="small" color="#fff" />
+          : <MaterialIcons name="logout" size={28} color="#fff" />
+        }
       </TouchableOpacity>
       <View style={styles.container}>
         <Text style={styles.title}>איזור אישי</Text>

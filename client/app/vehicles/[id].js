@@ -102,7 +102,6 @@ export default function VehicleDetailsScreen() {
         `https://data.gov.il/api/3/action/datastore_search?resource_id=053cea08-09bc-40ec-8f7a-156f0677aff3&q=${id}`
       );
       const data = await response.json();
-      console.log('Vehicle data:', data.result.records[0].degem_nm);
       if (data.result && data.result.records && data.result.records.length > 0) {
         setVehicle(data.result.records[0]);
       } else {

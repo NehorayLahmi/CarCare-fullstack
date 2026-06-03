@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import api from '../../../../lib/api';
-import { SERVICE_TYPES } from './constants';
+import { SERVICE_TYPES } from '../../../../lib/serviceConstants';
+import  {styles}  from '../../../../lib/style';
 
 const isValidDate = (dateStr) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
@@ -165,7 +166,7 @@ export default function ServiceFormModal({
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
                 style={{
                   border: '1px solid #bbb', borderRadius: 7, padding: 10,
-                  fontSize: 15, marginBottom: 10, 
+                  fontSize: 15, marginBottom: 10,
                   textAlign: 'right', backgroundColor: '#f9f9f9', direction: 'rtl',
                 }}
               />
@@ -270,91 +271,4 @@ export default function ServiceFormModal({
       </KeyboardAvoidingView>
     </Modal>
   );
-}
-
-const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center' },
-  content: { width: '90%', backgroundColor: '#fff', borderRadius: 12, padding: 20, elevation: 3 },
-  title: { fontSize: 20, fontWeight: 'bold', color: '#3949ab', marginBottom: 12, textAlign: 'center' },
-  label: { fontSize: 15, fontWeight: 'bold', color: '#1a237e', marginBottom: 3, textAlign: 'right', alignSelf: 'flex-end' },
-  input: { borderWidth: 1, borderColor: '#bbb', borderRadius: 7, padding: 8, fontSize: 15, marginBottom: 10, textAlign: 'right', backgroundColor: '#f9f9f9' },
-  dateBtn: { borderWidth: 1, borderColor: '#ccc', borderRadius: 7, padding: 10, marginBottom: 10, alignItems: 'flex-end', minHeight: 48 },
-  dateBtnText: { fontSize: 16, fontWeight: 'bold', color: '#3949ab', textAlign: 'right' },
-  garageList: { maxHeight: 120, backgroundColor: '#fff', borderColor: '#bbb', borderWidth: 1, borderRadius: 7, marginBottom: 10 },
-  garageItem: { padding: 10, borderBottomWidth: 0.5, borderColor: '#eee' },
-  garageItemText: { fontSize: 15, color: '#222' },
-  actions: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginTop: 10 },
-  saveBtn: { backgroundColor: '#3949ab', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 20, minWidth: 80, alignItems: 'center' },
-  saveBtnDisabled: { backgroundColor: '#9fa8da' },
-  saveBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  cancelBtn: { backgroundColor: '#bbb', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 20 },
-  cancelBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  pickerBtn: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#bbb',
-    borderRadius: 7,
-    padding: 12,
-    marginBottom: 10,
-    backgroundColor: '#f9f9f9',
-  },
-  pickerValue: { fontSize: 15, color: '#222', textAlign: 'right', flex: 1 },
-  pickerArrow: { fontSize: 20, color: '#aaa', marginLeft: 4, flexShrink: 0 },
-  customTypeContainer: {
-    backgroundColor: '#fff8e1',
-    borderWidth: 1.5,
-    borderColor: '#f9a825',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-  },
-  customTypeLabel: {
-    fontSize: 13,
-    color: '#f57f17',
-    fontWeight: 'bold',
-    textAlign: 'right',
-    marginBottom: 6,
-  },
-  customTypeInput: {
-    borderWidth: 1,
-    borderColor: '#f9a825',
-    borderRadius: 6,
-    padding: 10,
-    fontSize: 15,
-    backgroundColor: '#fff',
-    color: '#222',
-    textAlign: 'right',
-  },
-  pickerOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  pickerSheet: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-    maxHeight: '70%',
-  },
-  pickerHandle: {
-    width: 40, height: 4, backgroundColor: '#ddd',
-    borderRadius: 2, alignSelf: 'center', marginVertical: 12,
-  },
-  pickerTitle: {
-    fontSize: 17, fontWeight: 'bold', color: '#1a237e',
-    textAlign: 'center', marginBottom: 12,
-  },
-  pickerItem: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 8,
-    borderBottomWidth: 0.5,
-    borderColor: '#eee',
-  },
-  pickerItemSelected: { backgroundColor: '#e8eaf6' },
-  pickerItemText: { fontSize: 16, color: '#333', textAlign: 'right' },
-  pickerItemTextSelected: { color: '#3949ab', fontWeight: 'bold' },
-  pickerCheck: { fontSize: 16, color: '#3949ab', marginLeft: 8 },
-});
+};

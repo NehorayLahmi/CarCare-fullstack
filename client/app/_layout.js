@@ -2,7 +2,17 @@ import { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Alert } from 'react-native';
+import { requestNotificationPermission } from '../lib/notifications';
+
+// Fix iOS Alert text alignment for RTL (Hebrew)
+const _origAlert = Alert.alert.bind(Alert);
+Alert.alert = (title, message, ...rest) =>
+  _origAlert(
+    typeof title === 'string' ? '\u202B' + title : title,
+    typeof message === 'string' ? '\u202B' + message : message,
+    ...rest
+  );
 
 const PUBLIC_ROUTES = ['index', 'register', 'forgot-password'];
 
@@ -10,6 +20,10 @@ function AuthGuard({ children }) {
   const router = useRouter();
   const segments = useSegments();
   const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
 
   useEffect(() => {
     const check = async () => {
