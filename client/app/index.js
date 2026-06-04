@@ -2,11 +2,12 @@ import 'react-native-gesture-handler';
 import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  Alert, KeyboardAvoidingView, Platform, ScrollView,
+  KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../lib/api';
+import { showAlert } from '../lib/alert';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!id || !password) return Alert.alert('שגיאה', 'נא למלא את כל השדות');
+    if (!id || !password) return showAlert('שגיאה', 'נא למלא את כל השדות');
     setLoading(true);
     try {
       const res = await api.post('/auth/login', { id, password });
@@ -23,7 +24,7 @@ export default function LoginScreen() {
       await AsyncStorage.setItem('myId', id);
       router.replace('/home');
     } catch (err) {
-      Alert.alert('שגיאה', err?.response?.data || err.message || 'אירעה שגיאה');
+      showAlert('שגיאה', err?.response?.data || err.message || 'אירעה שגיאה');
     } finally {
       setLoading(false);
     }

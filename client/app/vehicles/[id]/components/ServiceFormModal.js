@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, Modal, FlatList,
-  ActivityIndicator, Alert, StyleSheet, Platform, KeyboardAvoidingView, ScrollView,
+  ActivityIndicator, StyleSheet, Platform, KeyboardAvoidingView, ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import api from '../../../../lib/api';
 import { SERVICE_TYPES } from '../../../../lib/serviceConstants';
 import  {styles}  from '../../../../lib/style';
+import { showAlert } from '../../../../lib/alert';
 
 const isValidDate = (dateStr) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
@@ -76,15 +77,15 @@ export default function ServiceFormModal({
     const finalType = type === 'טיפול אחר' ? customType.trim() : type;
 
     if (!finalType || !date || !cost || !garageName || !kilometer) {
-      Alert.alert('שגיאה', 'נא למלא את כל השדות החובה');
+      showAlert('שגיאה', 'נא למלא את כל השדות החובה');
       return;
     }
     if (Number(kilometer) < lastKilometer) {
-      Alert.alert('שגיאה', `הקילומטראז' שהוזן (${kilometer}) נמוך מהקילומטראז' האחרון (${lastKilometer})`);
+      showAlert('שגיאה', `הקילומטראז' שהוזן (${kilometer}) נמוך מהקילומטראז' האחרון (${lastKilometer})`);
       return;
     }
     if (!isValidDate(date)) {
-      Alert.alert('שגיאה', 'אנא הזן תאריך תקין בפורמט YYYY-MM-DD');
+      showAlert('שגיאה', 'אנא הזן תאריך תקין בפורמט YYYY-MM-DD');
       return;
     }
 
@@ -93,15 +94,15 @@ export default function ServiceFormModal({
       const body = { type: finalType, date, cost: Number(cost), note, garageName, kilometer: Number(kilometer) };
       if (editMode && _id) {
         await api.put(`/services/${_id}`, body);
-        Alert.alert('הצלחה', 'הטיפול עודכן בהצלחה!');
+        showAlert('הצלחה', 'הטיפול עודכן בהצלחה!');
       } else {
         await api.post('/services', { ...body, vehicleId });
-        Alert.alert('הצלחה', 'הטיפול נשמר בהצלחה!');
+        showAlert('הצלחה', 'הטיפול נשמר בהצלחה!');
       }
       onClose();
       onSaved();
     } catch (e) {
-      Alert.alert('שגיאה', `לא ניתן לשמור טיפול: ${e.response?.data?.message || e.message || 'נסה שוב מאוחר יותר'}`);
+      showAlert('שגיאה', `לא ניתן לשמור טיפול: ${e.response?.data?.message || e.message || 'נסה שוב מאוחר יותר'}`);
     } finally {
       setSaving(false);
     }

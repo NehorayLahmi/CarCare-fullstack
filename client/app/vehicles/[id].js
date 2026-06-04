@@ -4,11 +4,11 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   ScrollView,
   TouchableOpacity
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { showAlert } from '../../lib/alert';
 
 // מיפוי שמות שדות לאנגלית -> עברית (אפשר להוסיף/להחסיר לפי הצורך)
 const fieldLabels = {
@@ -108,7 +108,7 @@ export default function VehicleDetailsScreen() {
         setVehicle(null);
       }
     } catch (e) {
-      Alert.alert('שגיאה', 'לא ניתן לטעון את פרטי הרכב');
+      showAlert('שגיאה', 'לא ניתן לטעון את פרטי הרכב');
     } finally {
       setLoading(false);
     }

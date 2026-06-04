@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import api from '../lib/api';
+import { showAlert } from '../lib/alert';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 
 
@@ -14,15 +15,15 @@ export default function RegisterScreen() {
   const handleRegister = async () => {
     const { id, name, email, phone, password } = form;
     if (!id || !name || !email || !phone || !password)
-      return Alert.alert('שגיאה', 'נא למלא את כל השדות');
+      return showAlert('שגיאה', 'נא למלא את כל השדות');
 
     try {
       await api.post('/auth/register', form);
       //console.log('Registration successful:', form); // 🐞
-      Alert.alert('נרשמת בהצלחה', 'ניתן להתחבר עכשיו');
+      showAlert('נרשמת בהצלחה', 'ניתן להתחבר עכשיו');
       router.replace('/');
     } catch (err) {
-      Alert.alert('שגיאה', err?.response?.data || 'אירעה שגיאה');
+      showAlert('שגיאה', err?.response?.data || 'אירעה שגיאה');
     }
   };
 

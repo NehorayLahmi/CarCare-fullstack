@@ -3,13 +3,14 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import {
   View, Text, TextInput, FlatList, StyleSheet, ActivityIndicator,
-  TouchableOpacity, Modal, Alert
+  TouchableOpacity, Modal
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { jwtDecode } from "jwt-decode";
 import api from '../../lib/api';
+import { showAlert } from '../../lib/alert';
 
 
 export default function VehiclesScreen() {
@@ -89,7 +90,7 @@ export default function VehiclesScreen() {
   };
 
   const deleteVehicle = async (vehicleId) => {
-    Alert.alert('אישור מחיקה', 'האם למחוק את הרכב?', [
+    showAlert('אישור מחיקה', 'האם למחוק את הרכב?', [
       { text: 'ביטול', style: 'cancel' },
       {
         text: 'מחק',
@@ -100,7 +101,7 @@ export default function VehiclesScreen() {
             await api.delete(`/vehicles/${vehicleId}`);
             await fetchVehicles();
           } catch (e) {
-            Alert.alert('שגיאה', e.response?.data?.message || e.message);
+            showAlert('שגיאה', e.response?.data?.message || e.message);
           } finally {
             setLoading(false);
           }
@@ -112,7 +113,7 @@ export default function VehiclesScreen() {
   // חיפוש ב-data.gov.il לפי מספר רישוי
   const searchPlate = async () => {
     if (!plate.trim()) {
-      Alert.alert('שגיאה', 'אנא הזן מספר רישוי');
+      showAlert('שגיאה', 'אנא הזן מספר רישוי');
       setIsValidPlate(false);
       return;
     }
@@ -128,11 +129,11 @@ export default function VehiclesScreen() {
         setYear(record.shnat_yitzur !== undefined && record.shnat_yitzur !== null ? String(record.shnat_yitzur) : '');
         setIsValidPlate(true);
       } else {
-        Alert.alert('לא נמצא', 'לא נמצאו נתונים למספר רישוי זה');
+        showAlert('לא נמצא', 'לא נמצאו נתונים למספר רישוי זה');
         setIsValidPlate(false);
       }
     } catch (e) {
-      Alert.alert('שגיאה', 'אירעה שגיאה בעת החיפוש');
+      showAlert('שגיאה', 'אירעה שגיאה בעת החיפוש');
       setIsValidPlate(false);
     } finally {
       setSearching(false);
@@ -142,7 +143,7 @@ export default function VehiclesScreen() {
 
   const addVehicle = async () => {
     if (!plate.trim() || !model.trim() || !year.trim()) {
-      Alert.alert('שגיאה', 'אנא מלא את כל השדות');
+      showAlert('שגיאה', 'אנא מלא את כל השדות');
       return;
     }
     setLoading(true);
@@ -155,7 +156,7 @@ export default function VehiclesScreen() {
       setModalVisible(false);
       fetchVehicles();
     } catch (e) {
-      Alert.alert('שגיאה', e.response?.data?.message || e.message);
+      showAlert('שגיאה', e.response?.data?.message || e.message);
       setLoading(false);
     }
   };

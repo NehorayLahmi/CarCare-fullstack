@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, ScrollView, KeyboardAvoidingView, Platform
+  View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import api from '../../lib/api';
+import { showAlert } from '../../lib/alert';
 
 export default function AddModelService() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function AddModelService() {
   const saveService = async () => {
     // בדיקת שדות חובה
     if (!tozeretNm.trim() || !degemNm.trim() || !serviceType.trim()) {
-      Alert.alert('שגיאה', 'נא למלא את שדות היצרן, דגם וסוג טיפול');
+      showAlert('שגיאה', 'נא למלא את שדות היצרן, דגם וסוג טיפול');
       return;
     }
 
@@ -36,10 +37,10 @@ export default function AddModelService() {
         garageName: garageName.trim(),
       });
 
-      Alert.alert('הצלחה', 'סוג טיפול נוסף בהצלחה');
+      showAlert('הצלחה', 'סוג טיפול נוסף בהצלחה');
       router.back();
     } catch (e) {
-      Alert.alert('שגיאה', e.response?.data?.message || e.message);
+      showAlert('שגיאה', e.response?.data?.message || e.message);
     }
   };
 

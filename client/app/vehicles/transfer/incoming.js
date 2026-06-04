@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import api from '../../../lib/api';
+import { showAlert } from '../../../lib/alert';
 
 export default function IncomingTransfersScreen() {
     const [requests, setRequests] = useState([]);
@@ -16,7 +17,7 @@ export default function IncomingTransfersScreen() {
             const { data } = await api.get('/transfer', { params: { toId: myId, status: 'pending' } });
             setRequests(data);
         } catch (e) {
-            Alert.alert('שגיאה', 'בעיה בשליפת בקשות');
+            showAlert('שגיאה', 'בעיה בשליפת בקשות');
         } finally {
             setLoading(false);
         }
@@ -25,7 +26,7 @@ export default function IncomingTransfersScreen() {
     const respondToRequest = async (requestId, decision) => {
         try {
             await api.post(`/transfer/${requestId}/respond`, { decision });
-            Alert.alert('הצלחה', decision === 'approved' ? 'הרכב עבר לבעלותך!' : 'הבקשה נדחתה', [
+            showAlert('הצלחה', decision === 'approved' ? 'הרכב עבר לבעלותך!' : 'הבקשה נדחתה', [
                 {
                     text: 'סגור',
                     onPress: () => { router.back(); },
@@ -33,7 +34,7 @@ export default function IncomingTransfersScreen() {
             ]);
             fetchRequests();
         } catch (e) {
-            Alert.alert('שגיאה', e.response?.data?.message || e.message);
+            showAlert('שגיאה', e.response?.data?.message || e.message);
         }
     };
 

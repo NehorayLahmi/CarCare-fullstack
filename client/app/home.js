@@ -3,11 +3,12 @@
 
 
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, Alert, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { showAlert } from '../lib/alert';
 
 const { width } = Dimensions.get('window');
 
@@ -24,23 +25,15 @@ export default function HomeScreen() {
       router.replace('/');
     } catch (e) {
       setLoggingOut(false);
-      if (Platform.OS === 'web') {
-        alert('אירעה שגיאה בעת ההתנתקות');
-      } else {
-        Alert.alert('שגיאה', 'אירעה שגיאה בעת ההתנתקות');
-      }
+      showAlert('שגיאה', 'אירעה שגיאה בעת ההתנתקות');
     }
   };
 
   const handleLogout = () => {
-    if (Platform.OS === 'web') {
-      if (window.confirm('האם אתה בטוח שברצונך להתנתק?')) logout();
-    } else {
-      Alert.alert('התנתקות', 'האם אתה בטוח שברצונך להתנתק?', [
-        { text: 'ביטול', style: 'cancel' },
-        { text: 'התנתק', onPress: logout },
-      ]);
-    }
+    showAlert('התנתקות', 'האם אתה בטוח שברצונך להתנתק?', [
+      { text: 'ביטול', style: 'cancel' },
+      { text: 'התנתק', onPress: logout },
+    ]);
   };
 
   return (

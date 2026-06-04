@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Alert,
+  View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity,
   KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import api from '../../../lib/api';
+import { showAlert } from '../../../lib/alert';
 import { scheduleServiceReminder } from '../../../lib/notifications';
 import { SERVICE_TYPES, PERIODIC_SERVICE_TYPES, INITIAL_FORM } from '../../../lib/serviceConstants';
 import PeriodicInfoBox from './components/PeriodicInfoBox';
@@ -61,7 +62,7 @@ export default function VehicleServicesScreen() {
       setLastKilometer(0);
       setLastPeriodicService(null);
       setNextPeriodicServiceDate('שגיאת טעינה / אין נתונים');
-      Alert.alert('שגיאה', 'לא ניתן לטעון את היסטוריית הטיפולים');
+      showAlert('שגיאה', 'לא ניתן לטעון את היסטוריית הטיפולים');
     } finally {
       setLoading(false);
     }

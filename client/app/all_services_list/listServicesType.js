@@ -4,11 +4,11 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   StyleSheet,
 } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import api from '../../lib/api';
+import { showAlert } from '../../lib/alert';
 
 export default function ManufacturerTreatments({ manufacturer, onBack }) {
   const [treatments, setTreatments] = useState([]);
@@ -21,7 +21,7 @@ export default function ManufacturerTreatments({ manufacturer, onBack }) {
         const { data } = await api.get('/modelService', { params: { tozeret_nm: manufacturer } });
         setTreatments(data);
       } catch (error) {
-        Alert.alert('שגיאה', error.response?.data?.message || error.message || 'אירעה שגיאה');
+        showAlert('שגיאה', error.response?.data?.message || error.message || 'אירעה שגיאה');
       } finally {
         setLoading(false);
       }
@@ -35,7 +35,7 @@ export default function ManufacturerTreatments({ manufacturer, onBack }) {
       const { data: json } = await api.delete(
         `/modelService/${encodeURIComponent(item.tozeret_nm)}/${encodeURIComponent(item.degem_nm)}`
       );
-      Alert.alert('הצלחה', json.message);
+      showAlert('הצלחה', json.message);
       setTreatments(prev =>
         prev.filter(
           t =>
@@ -48,7 +48,7 @@ export default function ManufacturerTreatments({ manufacturer, onBack }) {
       );
       setExpandedIndex(null);
     } catch (error) {
-      Alert.alert('שגיאה', error.response?.data?.message || error.message);
+      showAlert('שגיאה', error.response?.data?.message || error.message);
     }
   }
 
@@ -90,7 +90,7 @@ export default function ManufacturerTreatments({ manufacturer, onBack }) {
       <TouchableOpacity
         style={styles.deleteButton}
         onPress={() =>
-          Alert.alert(
+          showAlert(
             'אישור מחיקה',
             `האם למחוק טיפול לדגם ${data.item.degem_nm}?`,
             [

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator
+  View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import api from '../../../lib/api';
+import { showAlert } from '../../../lib/alert';
 
 export default function TransferOwnershipScreen() {
   const { licensePlate } = useLocalSearchParams();
@@ -16,22 +17,22 @@ export default function TransferOwnershipScreen() {
 
   const sendTransferRequest = async () => {
     if (!targetId.trim()) {
-      Alert.alert('שגיאה', 'יש להזין תעודת זהות של מקבל הרכב');
+      showAlert('שגיאה', 'יש להזין תעודת זהות של מקבל הרכב');
       return;
     }
     if (!isValidId(targetId.trim())) {
-      Alert.alert('שגיאה', 'תעודת הזהות אינה תקינה');
+      showAlert('שגיאה', 'תעודת הזהות אינה תקינה');
       return;
     }
 
     setLoading(true);
     try {
       await api.post('/transfer', { licensePlate, toId: targetId.trim() });
-      Alert.alert('הצלחה', 'בקשת ההעברה נשלחה בהצלחה');
+      showAlert('הצלחה', 'בקשת ההעברה נשלחה בהצלחה');
       setTargetId('');
       router.back();
     } catch (e) {
-      Alert.alert('שגיאה', e.response?.data?.message || e.message);
+      showAlert('שגיאה', e.response?.data?.message || e.message);
     } finally {
       setLoading(false);
     }

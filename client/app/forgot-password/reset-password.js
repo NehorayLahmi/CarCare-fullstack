@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import api from '../../lib/api';
+import { showAlert } from '../../lib/alert';
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -19,10 +20,10 @@ export default function ResetPasswordScreen() {
     setLoading(true);
     try {
       await api.post('/auth/reset-password', { email, code, newPassword });
-      Alert.alert('הצלחה', 'הסיסמה אופסה!');
+      showAlert('הצלחה', 'הסיסמה אופסה!');
       router.replace('/');
     } catch (e) {
-      Alert.alert('שגיאה', e.response?.data?.message || e.message);
+      showAlert('שגיאה', e.response?.data?.message || e.message);
     } finally {
       setLoading(false);
     }

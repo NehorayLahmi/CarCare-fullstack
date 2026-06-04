@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import api from '../../lib/api';
+import { showAlert } from '../../lib/alert';
 
 export default function VerifyCodeScreen() {
   const router = useRouter();
@@ -13,10 +14,10 @@ export default function VerifyCodeScreen() {
     setLoading(true);
     try {
       await api.post('/auth/verify-reset-code', { email, code });
-      Alert.alert('הצלחה', 'קוד אומת, המשך לאיפוס סיסמה');
+      showAlert('הצלחה', 'קוד אומת, המשך לאיפוס סיסמה');
       router.push({ pathname: '/forgot-password/reset-password', params: { email, code } });
     } catch (e) {
-      Alert.alert('שגיאה', e.response?.data?.message || e.message);
+      showAlert('שגיאה', e.response?.data?.message || e.message);
     } finally {
       setLoading(false);
     }
