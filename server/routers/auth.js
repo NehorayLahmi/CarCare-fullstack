@@ -30,8 +30,6 @@ router.post('/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await User.create({ id, name, email, phone, password: hashedPassword });
-    console.log(`User registered: ${hashedPassword}`);
-
     res.status(201).send("נרשמת בהצלחה");
   } catch (err) {
     res.status(500).send(err.message);
@@ -56,9 +54,6 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-
-    console.log(`User logged in: ${token}`);
-
     res.json({ token });
   } catch (err) {
     res.status(500).send(err.message);

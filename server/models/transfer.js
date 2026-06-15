@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 
 const transferSchema = new mongoose.Schema({
   licensePlate: { type: String, required: true },
-  toId: { type: String, required: true },   // תעודת זהות מקבל
+  fromId: { type: String, required: true },  // תעודת זהות שולח
+  toId: { type: String, required: true },    // תעודת זהות מקבל
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],

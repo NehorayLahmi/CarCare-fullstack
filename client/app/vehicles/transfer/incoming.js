@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import api from '../../../lib/api';
@@ -8,8 +8,8 @@ import { showAlert } from '../../../lib/alert';
 export default function IncomingTransfersScreen() {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const router = useRouter();
+
     const fetchRequests = async () => {
         setLoading(true);
         const myId = await AsyncStorage.getItem('myId');
@@ -26,57 +26,124 @@ export default function IncomingTransfersScreen() {
     const respondToRequest = async (requestId, decision) => {
         try {
             await api.post(`/transfer/${requestId}/respond`, { decision });
-            showAlert('הצלחה', decision === 'approved' ? 'הרכב עבר לבעלותך!' : 'הבקשה נדחתה', [
-                {
-                    text: 'סגור',
-                    onPress: () => { router.back(); },
-                },
-            ]);
+            showAlert(
+                decision === 'approved' ? 'הרכב עבר לבעלותך!' : 'הבקשה נדחתה',
+                '',
+                [{ text: 'סגור', onPress: () => router.back() }]
+            );
             fetchRequests();
         } catch (e) {
             showAlert('שגיאה', e.response?.data?.message || e.message);
         }
     };
 
-    useEffect(() => {
-        fetchRequests();
-    }, []);
+    useEffect(() => { fetchRequests(); }, []);
 
     const renderItem = ({ item }) => (
-        <View style={{ padding: 16, margin: 8, backgroundColor: '#f5f5f5', borderRadius: 10 }}>
-            <Text>רכב: {item.licensePlate}</Text>
-            <Text>משולח: {item.fromId}</Text>
-            <View style={{ flexDirection: 'row', marginTop: 10 }}>
+        <View style={styles.card}>
+            <Text style={styles.cardLine}>
+                <Text style={styles.cardLabelBold}>רכב: </Text>
+                {item.licensePlate}
+            </Text>
+            <Text style={styles.cardLine}>
+                <Text style={styles.cardLabelBold}>שולח: </Text>
+                {item.fromName || item.fromId}
+            </Text>
+            <View style={styles.btnRow}>
                 <TouchableOpacity
-                    style={{ backgroundColor: '#4caf50', padding: 10, borderRadius: 8, marginRight: 8 }}
-                    onPress={() => respondToRequest(item._id, 'approved')}
-
-                >
-                    <Text style={{ color: '#fff' }}>אשר</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={{ backgroundColor: '#e53935', padding: 10, borderRadius: 8 }}
+                    style={[styles.btn, styles.rejectBtn]}
                     onPress={() => respondToRequest(item._id, 'rejected')}
                 >
-                    <Text style={{ color: '#fff' }}>דחה</Text>
+                    <Text style={styles.btnText}>דחה</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.btn, styles.approveBtn]}
+                    onPress={() => respondToRequest(item._id, 'approved')}
+                >
+                    <Text style={styles.btnText}>אשר קבלה</Text>
                 </TouchableOpacity>
             </View>
         </View>
     );
 
     return (
-        <View style={{ flex: 1, padding: 16 }}>
-            <Text style={{ fontSize: 22, fontWeight: 'bold', marginBottom: 16 }}>בקשות להעברה</Text>
+        <View style={styles.container}>
+            <Text style={styles.title}>בקשות העברת רכב</Text>
             {loading ? (
-                <ActivityIndicator size="large" color="#3949ab" />
+                <ActivityIndicator size="large" color="#3949ab" style={{ marginTop: 32 }} />
             ) : (
                 <FlatList
                     data={requests}
                     keyExtractor={item => item._id}
                     renderItem={renderItem}
-                    ListEmptyComponent={<Text>אין בקשות ממתינות</Text>}
+                    ListEmptyComponent={
+                        <Text style={styles.empty}>אין בקשות ממתינות</Text>
+                    }
                 />
             )}
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f3f6fa',
+        padding: 20,
+        paddingTop: 48,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#1a237e',
+        textAlign: 'right',
+        marginBottom: 20,
+    },
+    card: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 18,
+        marginBottom: 14,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOpacity: 0.07,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
+    },
+    cardLine: {
+        fontSize: 15,
+        color: '#333',
+        textAlign: 'right',
+        writingDirection: 'rtl',
+        marginBottom: 6,
+    },
+    cardLabelBold: {
+        fontWeight: 'bold',
+        color: '#3949ab',
+    },
+    btnRow: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: 14,
+        gap: 10,
+    },
+    btn: {
+        flex: 1,
+        paddingVertical: 11,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    approveBtn: { backgroundColor: '#4caf50' },
+    rejectBtn: { backgroundColor: '#e53935' },
+    btnText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
+    },
+    empty: {
+        textAlign: 'center',
+        color: '#888',
+        fontSize: 16,
+        marginTop: 40,
+    },
+});

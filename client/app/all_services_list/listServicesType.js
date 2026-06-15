@@ -76,7 +76,7 @@ export default function ManufacturerTreatments({ manufacturer, onBack }) {
             </Text>
             <Text style={styles.detailText}>הערות: {item.notes || '-'}</Text>
             <Text style={styles.detailText}>
-              עלות ממוצעת: {item.averageCost ? `${item.averageCost} ₪` : '-'}</Text>
+              עלות ממוצעת: {item.averageCost ? `₪ ${item.averageCost} ` : '-'}</Text>
             <Text style={styles.detailText}>
               מוסך מומלץ: {item.garageName || '-'}</Text>
           </View>
@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'center', // שונה ל-center
     minHeight: 70,            // גובה מינימלי קבוע
+    direction: 'rtl',
   },
   rowBack: {
     alignItems: 'center',

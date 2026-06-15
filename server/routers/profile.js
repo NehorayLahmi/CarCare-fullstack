@@ -1,26 +1,33 @@
 const express = require('express');
-const Service = require('../models/Service');
+const User = require('../models/User');
+
 const auth = require('../middleware/auth');
 
 const router = express.Router();
 router.use(auth);
 
-// הוספת טיפול
-router.post('/', async (req, res) => {
-  const { vehicleId, type, date, cost, note } = req.body;
+// שליפת פרופיל המשתמש המחובר
+router.get('/', async (req, res) => {
   try {
-    const service = await Service.create({ vehicleId, type, date, cost, note });
-    res.status(201).send(service);
+    const user = await User.findOne({ id: req.user.id }, '-password -resetCode -resetCodeExpires');
+    if (!user) return res.status(404).send('משתמש לא נמצא');
+    res.json(user);
   } catch (err) {
     res.status(500).send(err.message);
   }
 });
 
-// טיפולים לרכב מסוים
-router.get('/:vehicleId', async (req, res) => {
+// עדכון פרטי פרופיל (שם, מייל, טלפון)
+router.put('/', async (req, res) => {
+  const { name, email, phone } = req.body;
   try {
-    const services = await Service.find({ vehicleId: req.params.vehicleId }).sort({ date: -1 });
-    res.send(services);
+    const user = await User.findOneAndUpdate(
+      { id: req.user.id },
+      { name, email, phone },
+      { new: true, projection: '-password -resetCode -resetCodeExpires' }
+    );
+    if (!user) return res.status(404).send('משתמש לא נמצא');
+    res.json(user);
   } catch (err) {
     res.status(500).send(err.message);
   }

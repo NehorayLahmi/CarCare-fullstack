@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 
 // מיפוי שמות שדות לאנגלית -> עברית
@@ -99,7 +99,14 @@ export default function CarSearchScreen() {
           onChangeText={setPlate}
           keyboardType="numeric"
         />
-        <Button title="חפש" onPress={handleSearch} disabled={loading} />
+        <TouchableOpacity
+          style={[styles.searchBtn, loading && styles.searchBtnDisabled]}
+          onPress={handleSearch}
+          disabled={loading}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.searchBtnText}>חפש</Text>
+        </TouchableOpacity>
         {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
         {error && <Text style={styles.error}>{error}</Text>}
         {result && (
@@ -201,5 +208,18 @@ const styles = StyleSheet.create({
     color: '#333',
     flexShrink: 1,
     textAlign: 'right',
+  },
+  searchBtn: {
+    backgroundColor: '#3949ab',
+    borderRadius: 8,
+    paddingVertical: 13,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  searchBtnDisabled: { backgroundColor: '#9fa8da' },
+  searchBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

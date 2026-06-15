@@ -32,7 +32,7 @@ router.post('/', async (req, res) => {
       return res.status(409).json({ message: 'קיימת כבר בקשת העברה פעילה לרכב זה' });
     }
 
-    const transfer = new Transfer({ licensePlate, toId, status: 'pending' });
+    const transfer = new Transfer({ licensePlate, fromId: req.user.id, toId, status: 'pending' });
     await transfer.save();
     res.status(201).json({ message: 'הבקשה נוצרה', transfer });
   } catch (err) {
@@ -49,7 +49,16 @@ router.get('/', async (req, res) => {
     if (status) filter.status = status;
 
     const transfers = await Transfer.find(filter);
-    res.json(transfers);
+
+    // הוספת שם השולח לכל בקשה
+    const enriched = await Promise.all(
+      transfers.map(async (t) => {
+        const sender = await User.findOne({ id: t.fromId }, 'name');
+        return { ...t.toObject(), fromName: sender?.name || t.fromId };
+      })
+    );
+
+    res.json(enriched);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -65,11 +74,11 @@ router.post('/:id/respond', async (req, res) => {
     const transfer = await Transfer.findById(req.params.id);
     if (!transfer) return res.status(404).json({ message: 'בקשה לא נמצאה' });
 
+    if (transfer.toId !== req.user.id)
+      return res.status(403).json({ message: 'אין הרשאה לענות על בקשה זו' });
+
     transfer.status = decision;
     await transfer.save();
-
-    // אם הבקשה אושרה - עדכן את הבעלות ברכב
-          console.log(`עדכון בעלות לרכב ${transfer.licensePlate} למשתמש ${transfer.toId}`);
 
     if (decision === 'approved') {
       const updatedVehicle = await Vehicle.findOneAndUpdate(

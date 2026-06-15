@@ -161,10 +161,8 @@ export default function VehiclesScreen() {
     }
   };
 
-  // --- כאן הפתרון שלך ---
   const renderRightActions = (item) => (
     <View style={{ flexDirection: 'row' }}>
-      {/* כפתור העברת בעלות */}
       <TouchableOpacity
         style={styles.transferButton}
         onPress={() => router.push(`/vehicles/transfer/${item.licensePlate}`)}
@@ -172,7 +170,6 @@ export default function VehiclesScreen() {
       >
         <Text style={styles.transferButtonText}>העבר</Text>
       </TouchableOpacity>
-      {/* כפתור מחיקה */}
       <TouchableOpacity
         style={styles.deleteButton}
         onPress={() => deleteVehicle(item._id)}
@@ -212,15 +209,15 @@ export default function VehiclesScreen() {
     <View style={styles.container}>
       {/* פס התראה בראש הדף אם יש בקשות */}
       {!loadingRequests && pendingRequests.length > 0 && (
-        <View style={{ backgroundColor: '#ffeb3b', padding: 12, borderRadius: 8, marginBottom: 16 }}>
-          <Text style={{ fontWeight: 'bold', color: '#333' }}>
+        <View style={{ backgroundColor: '#ffeb3b', padding: 12, paddingRight: 64, borderRadius: 8, marginBottom: 16 }}>
+          <Text style={{ fontWeight: 'bold', color: '#333', textAlign: 'right', writingDirection: 'rtl' }}>
             יש לך {pendingRequests.length} בקשות להעברת רכב שממתינות לאישורך!
           </Text>
           <TouchableOpacity
-            style={{ backgroundColor: '#3949ab', padding: 8, borderRadius: 6, marginTop: 8 }}
+            style={{ backgroundColor: '#3949ab', padding: 8, borderRadius: 6, marginTop: 8, alignItems: 'center' }}
             onPress={() => router.push('../vehicles/transfer/incoming')}
           >
-            <Text style={{ color: '#fff' }}>מעבר לניהול בקשות</Text>
+            <Text style={{ color: '#fff', textAlign: 'center' }}>מעבר לניהול בקשות</Text>
           </TouchableOpacity>
         </View>
       )}

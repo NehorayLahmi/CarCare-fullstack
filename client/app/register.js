@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import api from '../lib/api';
 import { showAlert } from '../lib/alert';
@@ -9,6 +9,7 @@ import { KeyboardAvoidingView, Platform } from 'react-native';
 export default function RegisterScreen() {
   const router = useRouter();
   const [form, setForm] = useState({ id: '', name: '', email: '', phone: '', password: '' });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (field, value) => setForm({ ...form, [field]: value });
 
@@ -17,13 +18,15 @@ export default function RegisterScreen() {
     if (!id || !name || !email || !phone || !password)
       return showAlert('שגיאה', 'נא למלא את כל השדות');
 
+    setLoading(true);
     try {
       await api.post('/auth/register', form);
-      //console.log('Registration successful:', form); // 🐞
       showAlert('נרשמת בהצלחה', 'ניתן להתחבר עכשיו');
       router.replace('/');
     } catch (err) {
       showAlert('שגיאה', err?.response?.data || 'אירעה שגיאה');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,7 +43,20 @@ export default function RegisterScreen() {
         <TextInput style={styles.input} placeholder="מייל" onChangeText={(v) => handleChange('email', v)} />
         <TextInput style={styles.input} placeholder="טלפון" onChangeText={(v) => handleChange('phone', v)} keyboardType="phone-pad" />
         <TextInput style={styles.input} placeholder="סיסמה" secureTextEntry onChangeText={(v) => handleChange('password', v)} />
-        <Button title="הרשם" onPress={handleRegister} />
+        <TouchableOpacity
+          style={[styles.btnPrimary, loading && styles.btnDisabled]}
+          onPress={handleRegister}
+          disabled={loading}
+          activeOpacity={0.85}
+        >
+          {loading
+            ? <ActivityIndicator size="small" color="#fff" />
+            : <Text style={styles.btnText}>הרשם</Text>
+          }
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
+          <Text style={styles.backText}>יש לי כבר חשבון</Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
     
@@ -67,7 +83,26 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 8,
     fontSize: 16,
-    textAlign: 'right',           // יישור הטקסט לימין בשדה קלט
-
+    textAlign: 'right',
+  },
+  btnPrimary: {
+    backgroundColor: '#3949ab',
+    borderRadius: 10,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 14,
+  },
+  btnDisabled: { backgroundColor: '#9fa8da' },
+  btnText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: 'bold',
+  },
+  backText: {
+    color: '#3949ab',
+    fontSize: 14,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
 });
