@@ -63,7 +63,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const vehicle = await Vehicle.findOne({ _id: req.params.id, userId: req.user.id });
-    console.log(vehicle);
+    //console.log(vehicle);
     if (!vehicle) return res.status(404).send("רכב לא נמצא");
     res.send(vehicle);
   } catch (err) {

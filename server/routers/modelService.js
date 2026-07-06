@@ -27,14 +27,12 @@ router.get('/:tozeret_nm/:degem_nm', auth, async (req, res) => {
   const tozeret = req.params.tozeret_nm.trim();
   const degem = req.params.degem_nm.trim();
 
-  console.log('Received tozeret:', tozeret, ', degem:', degem);
+  //console.log('Received tozeret:', tozeret, ', degem:', degem);
 
   try {
     const services = await ModelService.find({ tozeret_nm: tozeret, degem_nm: degem });
-    console.log('Found services:', services);
     res.json(services);
   } catch (err) {
-    console.error(err);
     res.status(500).send(err.message);
   }
 });
@@ -76,6 +74,17 @@ router.post('/', auth, adminOnly, async (req, res) => {
       return res.status(400).json({ message: 'Validation failed', errors });
     }
     res.status(500).send(err.message);
+  }
+});
+
+// עדכון טיפול ספציפי לפי _id
+router.put('/item/:id', auth, adminOnly, async (req, res) => {
+  try {
+    const updated = await ModelService.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!updated) return res.status(404).json({ message: 'טיפול לא נמצא' });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 

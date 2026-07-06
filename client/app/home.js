@@ -48,12 +48,16 @@ export default function HomeScreen() {
         resizeMode="cover"
       />
       <View style={styles.overlay} />
-      {/* כפתור התנתקות קטן בפינה */}
+      {/* כפתור התנתקות קטן בפינה ימין */}
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7} disabled={loggingOut}>
         {loggingOut
           ? <ActivityIndicator size="small" color="#fff" />
           : <MaterialIcons name="logout" size={28} color="#fff" />
         }
+      </TouchableOpacity>
+      {/* כפתור פרופיל בפינה שמאל */}
+      <TouchableOpacity style={styles.profileBtn} onPress={() => router.push('/profile')} activeOpacity={0.7}>
+        <MaterialIcons name="person" size={28} color="#fff" />
       </TouchableOpacity>
       <View style={styles.container}>
         <Text style={styles.title}>איזור אישי</Text>
@@ -108,6 +112,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 42,
     right: 24,
+    zIndex: 10,
+    backgroundColor: '#3949abcc',
+    borderRadius: 20,
+    padding: 8,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+  },
+  profileBtn: {
+    position: 'absolute',
+    top: 42,
+    left: 24,
     zIndex: 10,
     backgroundColor: '#3949abcc',
     borderRadius: 20,

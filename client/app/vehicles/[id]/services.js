@@ -97,7 +97,7 @@ export default function VehicleServicesScreen() {
   }, [id]);
 
   const openAddModal = () => {
-    setInitialFormValues({ ...INITIAL_FORM });
+    setInitialFormValues({ ...INITIAL_FORM, type: serviceTypeItems[0]?.value || INITIAL_FORM.type });
     setEditMode(false);
     setModalVisible(true);
   };

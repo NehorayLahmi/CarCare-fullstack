@@ -154,7 +154,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#eef3f9',
         padding: 16,
-        direction: 'rtl', // כל התוכן ימין
     },
     input: {
         backgroundColor: '#fff',
@@ -164,7 +163,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         borderWidth: 1,
         borderColor: '#ccc',
-        textAlign: 'left', // יישור לימין
+        textAlign: 'right',
     },
     item: {
         backgroundColor: '#fff',
@@ -172,27 +171,30 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginBottom: 12,
         elevation: 2,
-        alignItems: 'flex-end', // יישור לימין של כל התוכן
+        alignItems: 'flex-end',
     },
     title: {
         fontSize: 18,
         fontWeight: '700',
         color: '#1a237e',
-        textAlign: 'left', // יישור לימין
+        textAlign: 'right',
+        writingDirection: 'rtl',
         width: '100%',
     },
     subtitle: {
         fontSize: 14,
         color: '#555',
         marginTop: 4,
-        textAlign: 'left', // יישור לימין
+        textAlign: 'right',
+        writingDirection: 'rtl',
         width: '100%',
     },
     subtitleSmall: {
         fontSize: 13,
         color: '#888',
         marginTop: 2,
-        textAlign: 'left',
+        textAlign: 'right',
+        writingDirection: 'rtl',
         width: '100%',
     },
     noResults: {
